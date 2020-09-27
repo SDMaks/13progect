@@ -15,7 +15,7 @@ module.exports.findUser = (req, res) => {
 
 module.exports.findUserId = (req, res) => {
   userSchema.findById(req.params.userId)
-    .orFail(() => Error('Нет такого пользователя'))
+    .orFail(() => Error('Нет такого пользователя в базе'))
     .then((user) => res.send({ data: user }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
@@ -39,7 +39,7 @@ module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
   const owner = req.user._id;
   userSchema.findByIdAndUpdate(owner, { name, about }, { new: true, runValidators: true })
-    .orFail(() => Error('Нет такого пользователя'))
+    .orFail(() => Error('Нет такого пользователя в базе'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.prototype.name === 'ValidationError') {
@@ -56,7 +56,7 @@ module.exports.updateAvatar = (req, res) => {
   const owner = req.user._id;
 
   userSchema.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
-    .orFail(() => Error('Нет такого пользователя'))
+    .orFail(() => Error('Нет такого пользователя в базе'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.prototype.name === 'ValidationError') {
