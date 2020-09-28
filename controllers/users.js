@@ -10,7 +10,7 @@ module.exports.findUser = (req, res) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.findUserId = (req, res) => {
@@ -24,15 +24,8 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   userSchema.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.prototype.name === 'ValidationError') {
-        res.status(400);
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
-      }
-      res.send({ message: err.message });
-    });
+    .then((user) => res.status(201).send({ data: user }))
+    .catch(() => res.status(400).send({ message: 'Не правильно введены данные' }));
 };
 
 module.exports.updateUser = (req, res) => {
