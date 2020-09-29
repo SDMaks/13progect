@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const userSchema = require('../models/user');
 
 const InBaseNotFound = require('../errors/InBaseNotFound');
@@ -14,10 +15,23 @@ module.exports.findUser = (req, res) => {
 };
 
 module.exports.findUserId = (req, res) => {
-  userSchema.findById(req.params.userId)
-    .orFail(() => Error('Нет такого пользователя в базе'))
-    .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+  try {
+    const { userId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new InBaseNotFound('Не валидный запрос');
+    }
+    let errorCode = 500;
+
+    userSchema.findById(userId)
+      .orFail(() => {
+        errorCode = 404;
+        throw new InBaseNotFound('Нет пользователя в базе');
+      })
+      .then((user) => res.send({ data: user }))
+      .catch((err) => res.status(errorCode).send({ message: err.message }));
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
 };
 
 module.exports.createUser = (req, res) => {

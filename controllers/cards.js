@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const cardSchema = require('../models/card');
 
 const InBaseNotFound = require('../errors/InBaseNotFound');
@@ -22,37 +23,58 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  const { cardId } = req.params;
-  let errorCode = 500;
-  cardSchema.findByIdAndRemove(cardId)
-    .orFail(() => {
-      errorCode = 404;
-      throw new InBaseNotFound('Такой карточки в базе нет');
-    })
-    .then((card) => res.send({ data: card }))
-    .catch((err) => res.status(errorCode).send({ message: err.message }));
+  try {
+    const { cardId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(cardId)) {
+      throw new InBaseNotFound('Не валидный запрос');
+    }
+    let errorCode = 500;
+    cardSchema.findByIdAndRemove(cardId)
+      .orFail(() => {
+        errorCode = 404;
+        throw new InBaseNotFound('Такой карточки в базе нет');
+      })
+      .then((card) => res.send({ data: card }))
+      .catch((err) => res.status(errorCode).send({ message: err.message }));
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
 };
 
 module.exports.likeCard = (req, res) => {
-  const { cardId } = req.params;
-  let errorCode = 500;
-  cardSchema.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
-    .orFail(() => {
-      errorCode = 404;
-      throw new InBaseNotFound('Такой карточки в базе нет');
-    })
-    .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => res.status(errorCode).send({ message: err.message }));
+  try {
+    const { cardId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(cardId)) {
+      throw new InBaseNotFound('Не валидный запрос');
+    }
+    let errorCode = 500;
+    cardSchema.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+      .orFail(() => {
+        errorCode = 404;
+        throw new InBaseNotFound('Такой карточки в базе нет');
+      })
+      .then((card) => res.status(200).send({ data: card }))
+      .catch((err) => res.status(errorCode).send({ message: err.message }));
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
 };
 
 module.exports.dislikeCard = (req, res) => {
-  const { cardId } = req.params;
-  let errorCode = 500;
-  cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
-    .orFail(() => {
-      errorCode = 404;
-      throw new InBaseNotFound('Такой карточки в базе нет');
-    })
-    .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => res.status(errorCode).send({ message: err.message }));
+  try {
+    const { cardId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(cardId)) {
+      throw new InBaseNotFound('Не валидный запрос');
+    }
+    let errorCode = 500;
+    cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
+      .orFail(() => {
+        errorCode = 404;
+        throw new InBaseNotFound('Такой карточки в базе нет');
+      })
+      .then((card) => res.status(200).send({ data: card }))
+      .catch((err) => res.status(errorCode).send({ message: err.message }));
+  } catch (err) {
+    res.status(400).send({ message: err.message });
+  }
 };
